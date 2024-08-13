@@ -68,7 +68,7 @@ class ImportadorCsvKt : AcaoRotinaJava {
                             val novoDetalhe = contextoAcao.novaLinha("AD_PGLOCFOLHADET")
                             novoDetalhe.setCampo("CODPG", codImportador)
                             novoDetalhe.setCampo("CODPARC", codparc)
-                            novoDetalhe.setCampo("VLRPAG", json.valor.trim().toBigDecimal())
+                            novoDetalhe.setCampo("VLRPAG", converterValorMonetario(json.valor.trim()))
                             novoDetalhe.setCampo("CODBCO", bancoParceiro) //banco do parceiro
                             novoDetalhe.setCampo("CODCTABCO", contaParceiro) //conta do parceiro
                             novoDetalhe.setCampo("DIGCONTAPARC", digitoContaParceiro) //digito da conta do parceiro
@@ -122,6 +122,17 @@ class ImportadorCsvKt : AcaoRotinaJava {
 
         return ret
 
+    }
+
+    /**
+     * Converte um valor (String) com separador de milhares para [BigDecimal]
+     * @author Aliny Sousa
+     * @param str  Texto a ser convertido
+     * @return [BigDecimal]
+     */
+    private fun converterValorMonetario(valorMonetario: String): BigDecimal {
+        val valorNumerico = valorMonetario.replace("\"", "").replace(".", "").replace(",", ".")
+        return BigDecimal(valorNumerico)
     }
 
     data class LinhaJson(

@@ -61,7 +61,7 @@ public class ImportadorCSV implements AcaoRotinaJava {
                         FluidCreateVO novoDetalhe = Utils.getFluidCreateVO("AD_PGLOCFOLHADET");
                         novoDetalhe.set("CODPG", codImportador);
                         novoDetalhe.set("CODPARC", new BigDecimal(json.codparc.trim()));
-                        novoDetalhe.set("VLRPAG", new BigDecimal(json.valor.trim()));
+                        novoDetalhe.set("VLRPAG", converterValorMonetario(json.valor.trim()));
                         novoDetalhe.save();
 
                         line = br.readLine();
@@ -89,9 +89,11 @@ public class ImportadorCSV implements AcaoRotinaJava {
     private LinhaJson trataLinha(String linha) throws Exception {
         String[] cells;
         if (linha.contains(";")) {
-            cells = linha.split("(?<=([^\"]*\"[^\"]*\")*[^\"]*$);");
+            // cells = linha.split("(?<=([^\"]*\"[^\"]*\")*[^\"]*$);");
+            cells = linha.split(";(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
         } else {
-            cells = linha.split("(?<=([^\"]*\"[^\"]*\")*[^\"]*$),");
+//            cells = linha.split("(?<=([^\"]*\"[^\"]*\")*[^\"]*$),");
+            cells = linha.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
         }
 
         cells = java.util.Arrays.stream(cells)
@@ -110,6 +112,11 @@ public class ImportadorCSV implements AcaoRotinaJava {
         }
 
         return ret;
+    }
+
+    private BigDecimal converterValorMonetario(String valorMonetario) {
+        String valorNumerico = valorMonetario.replace("\"","").replace(".", "").replace(",", ".");
+        return new BigDecimal(valorNumerico);
     }
 
     public static class LinhaJson {
