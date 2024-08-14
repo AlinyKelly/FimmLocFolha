@@ -4,7 +4,7 @@ import br.com.sankhya.extensions.actionbutton.AcaoRotinaJava;
 import br.com.sankhya.extensions.actionbutton.ContextoAcao;
 import br.com.sankhya.extensions.actionbutton.Registro;
 import br.com.sankhya.jape.core.JapeSession;
-import br.com.sankhya.jape.wrapper.fluid.FluidCreateVO;
+import br.com.sankhya.jape.vo.DynamicVO;
 import br.com.sankhya.modelcore.MGEModelException;
 import br.com.sankhya.ws.ServiceContext;
 import org.apache.commons.io.FileUtils;
@@ -32,7 +32,7 @@ public class ImportadorCSV implements AcaoRotinaJava {
             for (Registro linha : linhasSelecionadas) {
                 int count = 0;
 
-                codImportador = (BigDecimal) linha.getCampo("CODPG");
+                codImportador = linha.getCampo("CODPG");
                 byte[] data = (byte[]) linha.getCampo("ARQUIVO");
                 ServiceContext ctx = ServiceContext.getCurrent();
                 File file = new File(ctx.getTempFolder(), "IMPPG" + System.currentTimeMillis());
@@ -58,19 +58,36 @@ public class ImportadorCSV implements AcaoRotinaJava {
                         LinhaJson json = trataLinha(line);
                         ultimaLinhaJson = json;
 
-                        FluidCreateVO novoDetalhe = Utils.getFluidCreateVO("AD_PGLOCFOLHADET");
-                        novoDetalhe.set("CODPG", codImportador);
-                        novoDetalhe.set("CODPARC", new BigDecimal(json.codparc.trim()));
-                        novoDetalhe.set("VLRPAG", converterValorMonetario(json.valor.trim()));
-                        novoDetalhe.save();
+                        BigDecimal codparc = new BigDecimal(json.codparc.trim());
 
-                        line = br.readLine();
+                        DynamicVO buscarParceiro = Utils.retornaVO("Parceiro", "CODPARC = " + codparc);
+                        if (buscarParceiro != null) {
+                            BigDecimal bancoParceiro = buscarParceiro.asBigDecimal("CODBCO");
+                            String contaParceiro = buscarParceiro.asString("CODCTABCO");
+                            String digitoContaParceiro = buscarParceiro.asString("AD_DIGCONTAPARC");
+                            String tipoContaParceiro = buscarParceiro.asString("AD_TIPOCONTA");
+                            BigDecimal centroResultadoParceiro = buscarParceiro.asBigDecimalOrZero("AD_CODCENCUS");
+
+                            Registro novoDetalhe = contextoAcao.novaLinha("AD_PGLOCFOLHADET");
+                            novoDetalhe.setCampo("CODPG", codImportador);
+                            novoDetalhe.setCampo("CODPARC", codparc);
+                            novoDetalhe.setCampo("VLRPAG", converterValorMonetario(json.valor.trim()));
+                            novoDetalhe.setCampo("CODBCO", bancoParceiro); //banco do parceiro
+                            novoDetalhe.setCampo("CODCTABCO", contaParceiro); //conta do parceiro
+                            novoDetalhe.setCampo("DIGCONTAPARC", digitoContaParceiro); //digito da conta do parceiro
+                            novoDetalhe.setCampo("TIPOCONTA", tipoContaParceiro); //tipo da conta do parceiro
+                            novoDetalhe.setCampo("CODCENCUS", centroResultadoParceiro); //centro de resultados do parceiro
+
+                            novoDetalhe.save();
+
+                            line = br.readLine();
+                        }
                     }
                 }
             }
 
         } catch (Exception e) {
-            throw new MGEModelException(e.toString() + " " + ultimaLinhaJson);
+            throw new MGEModelException(e + " " + ultimaLinhaJson);
         } finally {
             JapeSession.close(hnd);
         }
