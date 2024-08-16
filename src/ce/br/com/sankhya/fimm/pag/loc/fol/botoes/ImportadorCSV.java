@@ -66,7 +66,7 @@ public class ImportadorCSV implements AcaoRotinaJava {
                             String contaParceiro = buscarParceiro.asString("CODCTABCO");
                             String digitoContaParceiro = buscarParceiro.asString("AD_DIGCONTAPARC");
                             String tipoContaParceiro = buscarParceiro.asString("AD_TIPOCONTA");
-                            BigDecimal centroResultadoParceiro = buscarParceiro.asBigDecimalOrZero("AD_CODCENCUS");
+                            BigDecimal centroResultadoParceiro = buscarParceiro.asBigDecimal("AD_CODCENCUS");
 
                             Registro novoDetalhe = contextoAcao.novaLinha("AD_PGLOCFOLHADET");
                             novoDetalhe.setCampo("CODPG", codImportador);
