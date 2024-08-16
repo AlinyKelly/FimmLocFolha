@@ -20,66 +20,67 @@ public class InserirFinanceiro implements AcaoRotinaJava {
         Registro[] linhasSelecionadas = contextoAcao.getLinhas();
 
         for (Registro linha : linhasSelecionadas) {
-            BigDecimal parceiro = (BigDecimal) linha.getCampo("CODPARC");
-            BigDecimal vlrpag = (BigDecimal) linha.getCampo("VLRPAG");
-            BigDecimal empresaPagamento = (BigDecimal) linha.getCampo("CODEMPPG");
-            BigDecimal bancoPagamento = (BigDecimal) linha.getCampo("CODBCOPG");
-            String contaPagamento = (String) linha.getCampo("CODCTABCOPG");
-            Timestamp dtVencimento = (Timestamp) linha.getCampo("DTVENC");
-            Timestamp dtNeg = (Timestamp) linha.getCampo("DTNEG");
-            Timestamp dtpagamento = (Timestamp) linha.getCampo("DTPAG");
-            BigDecimal top = (BigDecimal) linha.getCampo("CODTIPOPER");
-            BigDecimal natureza = (BigDecimal) linha.getCampo("CODNAT");
-            String tipoConta = (String) linha.getCampo("TIPOCONTA");
-            BigDecimal centroResultado = (BigDecimal) linha.getCampo("CODCENCUS");
+            BigDecimal nufinDet = (BigDecimal) linha.getCampo("NUFIN");
+            if (nufinDet == null) {
+                BigDecimal parceiro = (BigDecimal) linha.getCampo("CODPARC");
+                BigDecimal vlrpag = (BigDecimal) linha.getCampo("VLRPAG");
+                BigDecimal empresaPagamento = (BigDecimal) linha.getCampo("CODEMPPG");
+                BigDecimal bancoPagamento = (BigDecimal) linha.getCampo("CODBCOPG");
+                String contaPagamento = (String) linha.getCampo("CODCTABCOPG");
+                Timestamp dtVencimento = (Timestamp) linha.getCampo("DTVENC");
+                Timestamp dtNeg = (Timestamp) linha.getCampo("DTNEG");
+                Timestamp dtpagamento = (Timestamp) linha.getCampo("DTPAG");
+                BigDecimal top = (BigDecimal) linha.getCampo("CODTIPOPER");
+                BigDecimal natureza = (BigDecimal) linha.getCampo("CODNAT");
+                String tipoConta = (String) linha.getCampo("TIPOCONTA");
+                BigDecimal centroResultado = (BigDecimal) linha.getCampo("CODCENCUS");
 
-            LocalDateTime localDateTime = dtpagamento.toLocalDateTime();
-            int mes = localDateTime.getMonthValue() - 1;
-            int ano = localDateTime.getYear();
+                LocalDateTime localDateTime = dtpagamento.toLocalDateTime();
+                int mes = localDateTime.getMonthValue() - 1;
+                int ano = localDateTime.getYear();
 
-            String numnota = mes + String.valueOf(ano);
+                String numnota = mes + String.valueOf(ano);
 
-            //Utils.mostraErro("Competencia = " + numnota + " Data Pagamento = " + dtpagamento + " Mes - 1 = " + mes + " ano = " + ano + " Numnota = " + numnota);
+                BigDecimal tipoTitulo;
+                DynamicVO buscarConfigTipo = Utils.retornaVO("AD_CONFIGTIP", "TIPOCONTA = '" + tipoConta + "'");
 
-            BigDecimal tipoTitulo;
-            DynamicVO buscarConfigTipo = Utils.retornaVO("AD_CONFIGTIP", "TIPOCONTA = '" + tipoConta + "'");
+                if (buscarConfigTipo != null) {
+                    tipoTitulo = buscarConfigTipo.asBigDecimalOrZero("CODTIPTIT");
+                } else {
+                    tipoTitulo = BigDecimal.ZERO;
+                }
 
-            if (buscarConfigTipo != null) {
-                tipoTitulo = buscarConfigTipo.asBigDecimalOrZero("CODTIPTIT");
-            } else {
-                tipoTitulo = BigDecimal.ZERO;
-            }
+                try {
+                    Registro criarFinanceiro = contextoAcao.novaLinha("Financeiro");
+                    criarFinanceiro.setCampo("NUMNOTA", numnota);
+                    criarFinanceiro.setCampo("CODPARC", parceiro);
+                    criarFinanceiro.setCampo("CODEMP", empresaPagamento);
+                    criarFinanceiro.setCampo("RECDESP", -1);
+                    criarFinanceiro.setCampo("DTVENC", dtVencimento);
+                    criarFinanceiro.setCampo("DTNEG", dtNeg);
+                    criarFinanceiro.setCampo("DHMOV", dtNeg); //Data e Hora
+                    criarFinanceiro.setCampo("DTENTSAI", dtNeg);
+                    criarFinanceiro.setCampo("DTALTER", Utils.getDHAtual()); //Data e Hora
+                    criarFinanceiro.setCampo("VLRDESDOB", vlrpag);
+                    criarFinanceiro.setCampo("CODTIPOPER", top);
+                    criarFinanceiro.setCampo("CODTIPTIT", tipoTitulo);
+                    criarFinanceiro.setCampo("CODNAT", natureza);
+                    criarFinanceiro.setCampo("CODCENCUS", centroResultado);
+                    criarFinanceiro.setCampo("CODBCO", bancoPagamento);
+                    criarFinanceiro.setCampo("CODCTABCOINT", contaPagamento);
+                    criarFinanceiro.setCampo("AD_DTPAG", dtpagamento);
+                    criarFinanceiro.save();
 
-            try {
-                Registro criarFinanceiro = contextoAcao.novaLinha("Financeiro");
-                criarFinanceiro.setCampo("NUMNOTA", numnota);
-                criarFinanceiro.setCampo("CODPARC", parceiro);
-                criarFinanceiro.setCampo("CODEMP", empresaPagamento);
-                criarFinanceiro.setCampo("RECDESP", -1);
-                criarFinanceiro.setCampo("DTVENC", dtVencimento);
-                criarFinanceiro.setCampo("DTNEG", dtNeg);
-                criarFinanceiro.setCampo("DHMOV", dtNeg); //Data e Hora
-                criarFinanceiro.setCampo("DTENTSAI", dtNeg);
-                criarFinanceiro.setCampo("DTALTER", Utils.getDHAtual()); //Data e Hora
-                criarFinanceiro.setCampo("VLRDESDOB", vlrpag);
-                criarFinanceiro.setCampo("CODTIPOPER", top);
-                criarFinanceiro.setCampo("CODTIPTIT", tipoTitulo);
-                criarFinanceiro.setCampo("CODNAT", natureza);
-                criarFinanceiro.setCampo("CODCENCUS", centroResultado);
-                criarFinanceiro.setCampo("CODBCO", bancoPagamento);
-                criarFinanceiro.setCampo("CODCTABCOINT", contaPagamento);
-                criarFinanceiro.setCampo("AD_DTPAG", dtpagamento);
-                criarFinanceiro.save();
+                    Object nufin = criarFinanceiro.getCampo("NUFIN");
 
-                Object nufin = criarFinanceiro.getCampo("NUFIN");
-
-                //Realizar um update no campo nufin das linhas selecionadas.
-                linha.setCampo("NUFIN", nufin);
-                linha.setCampo("ERRO", null);
-                linha.save();
-            } catch (Exception e) {
-                linha.setCampo("ERRO", "Não foi possível criar o financeiro, verifique o erro: " + e.getLocalizedMessage());
-                linha.save();
+                    //Realizar um update no campo nufin das linhas selecionadas.
+                    linha.setCampo("NUFIN", nufin);
+                    linha.setCampo("ERRO", null);
+                    linha.save();
+                } catch (Exception e) {
+                    linha.setCampo("ERRO", "Não foi possível criar o financeiro, verifique o erro: " + e.getLocalizedMessage());
+                    linha.save();
+                }
             }
         }
 

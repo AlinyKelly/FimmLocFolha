@@ -29,6 +29,7 @@ public class RemoverNufin implements EventoProgramavelJava {
         if (buscarNufin != null) {
             FluidUpdateVO updateVO = Utils.getFluidUpdateByPKVO("AD_PGLOCFOLHADET", buscarNufin.getPrimaryKey());
             updateVO.set("NUFIN", null);
+            updateVO.set("ERRO", null);
             updateVO.update();
         }
     }
