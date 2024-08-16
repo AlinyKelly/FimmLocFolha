@@ -50,31 +50,37 @@ public class InserirFinanceiro implements AcaoRotinaJava {
                 tipoTitulo = BigDecimal.ZERO;
             }
 
-            Registro criarFinanceiro = contextoAcao.novaLinha("Financeiro");
-            criarFinanceiro.setCampo("NUMNOTA", numnota);
-            criarFinanceiro.setCampo("CODPARC", parceiro);
-            criarFinanceiro.setCampo("CODEMP", empresaPagamento);
-            criarFinanceiro.setCampo("RECDESP", -1);
-            criarFinanceiro.setCampo("DTVENC", dtVencimento);
-            criarFinanceiro.setCampo("DTNEG", dtNeg);
-            criarFinanceiro.setCampo("DHMOV", dtNeg); //Data e Hora
-            criarFinanceiro.setCampo("DTENTSAI", dtNeg);
-            criarFinanceiro.setCampo("DTALTER", Utils.getDHAtual()); //Data e Hora
-            criarFinanceiro.setCampo("VLRDESDOB", vlrpag);
-            criarFinanceiro.setCampo("CODTIPOPER", top);
-            criarFinanceiro.setCampo("CODTIPTIT", tipoTitulo);
-            criarFinanceiro.setCampo("CODNAT", natureza);
-            criarFinanceiro.setCampo("CODCENCUS", centroResultado);
-            criarFinanceiro.setCampo("CODBCO", bancoPagamento);
-            criarFinanceiro.setCampo("CODCTABCOINT", contaPagamento);
-            criarFinanceiro.setCampo("AD_DTPAG", dtpagamento);
-            criarFinanceiro.save();
+            try {
+                Registro criarFinanceiro = contextoAcao.novaLinha("Financeiro");
+                criarFinanceiro.setCampo("NUMNOTA", numnota);
+                criarFinanceiro.setCampo("CODPARC", parceiro);
+                criarFinanceiro.setCampo("CODEMP", empresaPagamento);
+                criarFinanceiro.setCampo("RECDESP", -1);
+                criarFinanceiro.setCampo("DTVENC", dtVencimento);
+                criarFinanceiro.setCampo("DTNEG", dtNeg);
+                criarFinanceiro.setCampo("DHMOV", dtNeg); //Data e Hora
+                criarFinanceiro.setCampo("DTENTSAI", dtNeg);
+                criarFinanceiro.setCampo("DTALTER", Utils.getDHAtual()); //Data e Hora
+                criarFinanceiro.setCampo("VLRDESDOB", vlrpag);
+                criarFinanceiro.setCampo("CODTIPOPER", top);
+                criarFinanceiro.setCampo("CODTIPTIT", tipoTitulo);
+                criarFinanceiro.setCampo("CODNAT", natureza);
+                criarFinanceiro.setCampo("CODCENCUS", centroResultado);
+                criarFinanceiro.setCampo("CODBCO", bancoPagamento);
+                criarFinanceiro.setCampo("CODCTABCOINT", contaPagamento);
+                criarFinanceiro.setCampo("AD_DTPAG", dtpagamento);
+                criarFinanceiro.save();
 
-            Object nufin = criarFinanceiro.getCampo("NUFIN");
+                Object nufin = criarFinanceiro.getCampo("NUFIN");
 
-            //Realizar um update no campo nufin das linhas selecionadas.
-            linha.setCampo("NUFIN", nufin);
-            linha.save();
+                //Realizar um update no campo nufin das linhas selecionadas.
+                linha.setCampo("NUFIN", nufin);
+                linha.setCampo("ERRO", null);
+                linha.save();
+            } catch (Exception e) {
+                linha.setCampo("ERRO", "Não foi possível criar o financeiro, verifique o erro: " + e.getLocalizedMessage());
+                linha.save();
+            }
         }
 
         contextoAcao.setMensagemRetorno("Títulos gerados com sucesso.");

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="FimmLocFolha:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/FimmLocFolha_jar</output-path>
+    <root id="archive" name="FimmLocFolha.jar">
+      <element id="module-output" name="FimmLocFolha" />
+    </root>
+  </artifact>
+</component>

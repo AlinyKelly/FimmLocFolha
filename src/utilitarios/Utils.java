@@ -5,6 +5,7 @@ import br.com.sankhya.jape.vo.DynamicVO;
 import br.com.sankhya.jape.wrapper.JapeFactory;
 import br.com.sankhya.jape.wrapper.JapeWrapper;
 import br.com.sankhya.jape.wrapper.fluid.FluidCreateVO;
+import br.com.sankhya.jape.wrapper.fluid.FluidUpdateVO;
 import br.com.sankhya.modelcore.MGEModelException;
 
 import java.sql.Timestamp;
@@ -62,6 +63,22 @@ public class Utils {
 
             JapeWrapper separacaoDAO = JapeFactory.dao(instancia);
             vo = separacaoDAO.create();
+        } catch (Exception e) {
+            throw new MGEModelException(e);
+        } finally {
+            JapeSession.close(hnd);
+        }
+        return vo;
+    }
+
+    public static FluidUpdateVO getFluidUpdateByPKVO(String instancia, Object... objects) throws MGEModelException {
+        JapeSession.SessionHandle hnd = null;
+        FluidUpdateVO vo;
+        try {
+            hnd = JapeSession.open();
+
+            JapeWrapper instanciaDAO = JapeFactory.dao(instancia);
+            vo = instanciaDAO.prepareToUpdateByPK(objects);
         } catch (Exception e) {
             throw new MGEModelException(e);
         } finally {

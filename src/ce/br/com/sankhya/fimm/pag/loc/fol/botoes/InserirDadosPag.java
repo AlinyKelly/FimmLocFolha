@@ -32,8 +32,6 @@ public class InserirDadosPag implements AcaoRotinaJava {
             Registro linhaPai = contextoAcao.getLinhaPai();
             Object codpg = linhaPai.getCampo("CODPG");
 
-            Collection<DynamicVO> detalhes = Utils.retornaVOs("AD_PGLOCFOLHADET", "CODPG = " + codpg);
-
             JapeSession.SessionHandle hnd = null;
             JdbcWrapper jdbc = null;
 
@@ -43,7 +41,7 @@ public class InserirDadosPag implements AcaoRotinaJava {
                 jdbc.openSession();
 
                 NativeSql queryUpd = new NativeSql(jdbc);
-                queryUpd.appendSql("UPDATE AD_PGLOCFOLHADET SET CODBCOPG = :CODBCOPG, CODCTABCOPG = :CODCTABCOPG, DTVENC = :DTVENC, DTNEG = :DTNEG, DTPAG = :DTPAG, CODTIPOPER = :CODTIPOPER, CODNAT = :CODNAT, CODEMPPG = :CODEMPPG WHERE CODPG = :CODPG");
+                queryUpd.appendSql("UPDATE AD_PGLOCFOLHADET SET CODBCOPG = :CODBCOPG, CODCTABCOPG = :CODCTABCOPG, DTVENC = :DTVENC, DTNEG = :DTNEG, DTPAG = :DTPAG, CODTIPOPER = :CODTIPOPER, CODNAT = :CODNAT, CODEMPPG = :CODEMPPG WHERE CODBCOPG IS NULL AND CODCTABCOPG IS NULL AND DTVENC IS NULL AND DTNEG IS NULL AND DTPAG IS NULL AND CODTIPOPER IS NULL AND CODNAT IS NULL AND CODEMPPG  IS NULL AND CODPG = :CODPG");
                 //queryUpd.executeUpdate();
                 queryUpd.setReuseStatements(true); // Utilizado para consumir menos memoria
                 queryUpd.setBatchUpdateSize(500); // A cada 500 updates armazenados, será feito um commit (flush) do comando.

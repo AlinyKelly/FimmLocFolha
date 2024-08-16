@@ -5,6 +5,7 @@ import br.com.sankhya.extensions.actionbutton.ContextoAcao;
 import br.com.sankhya.extensions.actionbutton.Registro;
 import br.com.sankhya.jape.core.JapeSession;
 import br.com.sankhya.jape.vo.DynamicVO;
+import br.com.sankhya.jape.wrapper.fluid.FluidUpdateVO;
 import br.com.sankhya.modelcore.MGEModelException;
 import br.com.sankhya.ws.ServiceContext;
 import org.apache.commons.io.FileUtils;
@@ -14,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,27 +62,69 @@ public class ImportadorCSV implements AcaoRotinaJava {
 
                         BigDecimal codparc = new BigDecimal(json.codparc.trim());
 
-                        DynamicVO buscarParceiro = Utils.retornaVO("Parceiro", "CODPARC = " + codparc);
-                        if (buscarParceiro != null) {
-                            BigDecimal bancoParceiro = buscarParceiro.asBigDecimal("CODBCO");
-                            String contaParceiro = buscarParceiro.asString("CODCTABCO");
-                            String digitoContaParceiro = buscarParceiro.asString("AD_DIGCONTAPARC");
-                            String tipoContaParceiro = buscarParceiro.asString("AD_TIPOCONTA");
-                            BigDecimal centroResultadoParceiro = buscarParceiro.asBigDecimal("AD_CODCENCUS");
+                        DynamicVO verificaDetalhe = Utils.retornaVO("AD_PGLOCFOLHADET", "CODPG = " + codImportador + " AND CODPARC = " + codparc);
 
-                            Registro novoDetalhe = contextoAcao.novaLinha("AD_PGLOCFOLHADET");
-                            novoDetalhe.setCampo("CODPG", codImportador);
-                            novoDetalhe.setCampo("CODPARC", codparc);
-                            novoDetalhe.setCampo("VLRPAG", converterValorMonetario(json.valor.trim()));
-                            novoDetalhe.setCampo("CODBCO", bancoParceiro); //banco do parceiro
-                            novoDetalhe.setCampo("CODCTABCO", contaParceiro); //conta do parceiro
-                            novoDetalhe.setCampo("DIGCONTAPARC", digitoContaParceiro); //digito da conta do parceiro
-                            novoDetalhe.setCampo("TIPOCONTA", tipoContaParceiro); //tipo da conta do parceiro
-                            novoDetalhe.setCampo("CODCENCUS", centroResultadoParceiro); //centro de resultados do parceiro
+                        if (verificaDetalhe != null) {
+                            //BigDecimal codDetalhe = verificaDetalhe.asBigDecimal("CODPGDET");
+                            BigDecimal nufin = verificaDetalhe.asBigDecimal("NUFIN");
+                            if (nufin == null) {
+                                DynamicVO buscarParceiro = Utils.retornaVO("Parceiro", "CODPARC = " + codparc);
+                                BigDecimal bancoParceiro = buscarParceiro.asBigDecimal("CODBCO");
+                                String contaParceiro = buscarParceiro.asString("CODCTABCO");
+                                String digitoContaParceiro = buscarParceiro.asString("AD_DIGCONTAPARC");
+                                String tipoContaParceiro = buscarParceiro.asString("AD_TIPOCONTA");
+                                BigDecimal centroResultadoParceiro = buscarParceiro.asBigDecimal("AD_CODCENCUS");
+                                String erro = null;
 
-                            novoDetalhe.save();
+                                if (bancoParceiro == null || contaParceiro == null || digitoContaParceiro == null || tipoContaParceiro == null || centroResultadoParceiro == null) {
+                                    erro = "ATENÇÃO! Campo(s) vazio(s). Verifique os campos de Identificação do Parceiro.";
+                                }
+
+                                FluidUpdateVO updateVO = Utils.getFluidUpdateByPKVO("AD_PGLOCFOLHADET", verificaDetalhe.getPrimaryKey());
+                                updateVO.set("VLRPAG", converterValorMonetario(json.valor.trim()));
+                                updateVO.set("CODBCO", bancoParceiro); //banco do parceiro
+                                updateVO.set("CODCTABCO", contaParceiro); //conta do parceiro
+                                updateVO.set("DIGCONTAPARC", digitoContaParceiro); //digito da conta do parceiro
+                                updateVO.set("TIPOCONTA", tipoContaParceiro); //tipo da conta do parceiro
+                                updateVO.set("CODCENCUS", centroResultadoParceiro); //centro de resultados do parceiro
+                                updateVO.set("ERRO", erro);
+                                updateVO.update();
+                            } else {
+                                FluidUpdateVO updateVO = Utils.getFluidUpdateByPKVO("AD_PGLOCFOLHADET", verificaDetalhe.getPrimaryKey());
+                                updateVO.set("ERRO", "Não foi possível atualizar. Parceiro com financeiro gerado, contate o setor responsável.");
+                                updateVO.update();
+                            }
 
                             line = br.readLine();
+
+                        } else {
+                            DynamicVO buscarParceiro = Utils.retornaVO("Parceiro", "CODPARC = " + codparc);
+                            if (buscarParceiro != null) {
+                                BigDecimal bancoParceiro = buscarParceiro.asBigDecimal("CODBCO");
+                                String contaParceiro = buscarParceiro.asString("CODCTABCO");
+                                String digitoContaParceiro = buscarParceiro.asString("AD_DIGCONTAPARC");
+                                String tipoContaParceiro = buscarParceiro.asString("AD_TIPOCONTA");
+                                BigDecimal centroResultadoParceiro = buscarParceiro.asBigDecimal("AD_CODCENCUS");
+                                String erro = null;
+
+                                if (bancoParceiro == null || contaParceiro == null || digitoContaParceiro == null || tipoContaParceiro == null || centroResultadoParceiro == null) {
+                                    erro = "ATENÇÃO! Campo(s) vazio(s). Verifique os campos de Identificação do Parceiro.";
+                                }
+
+                                Registro novoDetalhe = contextoAcao.novaLinha("AD_PGLOCFOLHADET");
+                                novoDetalhe.setCampo("CODPG", codImportador);
+                                novoDetalhe.setCampo("CODPARC", codparc);
+                                novoDetalhe.setCampo("VLRPAG", converterValorMonetario(json.valor.trim()));
+                                novoDetalhe.setCampo("CODBCO", bancoParceiro); //banco do parceiro
+                                novoDetalhe.setCampo("CODCTABCO", contaParceiro); //conta do parceiro
+                                novoDetalhe.setCampo("DIGCONTAPARC", digitoContaParceiro); //digito da conta do parceiro
+                                novoDetalhe.setCampo("TIPOCONTA", tipoContaParceiro); //tipo da conta do parceiro
+                                novoDetalhe.setCampo("CODCENCUS", centroResultadoParceiro); //centro de resultados do parceiro
+                                novoDetalhe.setCampo("ERRO", erro);
+                                novoDetalhe.save();
+
+                                line = br.readLine();
+                            }
                         }
                     }
                 }
@@ -113,7 +157,7 @@ public class ImportadorCSV implements AcaoRotinaJava {
             cells = linha.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
         }
 
-        cells = java.util.Arrays.stream(cells)
+        cells = Arrays.stream(cells)
                 .filter(predicate -> !predicate.isEmpty())
                 .toArray(String[]::new);
 
@@ -132,7 +176,7 @@ public class ImportadorCSV implements AcaoRotinaJava {
     }
 
     private BigDecimal converterValorMonetario(String valorMonetario) {
-        String valorNumerico = valorMonetario.replace("\"","").replace(".", "").replace(",", ".");
+        String valorNumerico = valorMonetario.replace("\"", "").replace(".", "").replace(",", ".");
         return new BigDecimal(valorNumerico);
     }
 
