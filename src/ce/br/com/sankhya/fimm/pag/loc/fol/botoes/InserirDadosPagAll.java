@@ -24,6 +24,7 @@ public class InserirDadosPagAll implements AcaoRotinaJava {
         Object dtpagParametro = contextoAcao.getParam("DTPAG");
         Object topParametro = contextoAcao.getParam("TOP");
         Object naturezaParametro = contextoAcao.getParam("NATUREZA");
+        Object centroResultParametro = contextoAcao.getParam("CENTRORESULTADOS");
 
         Registro linhaPai = contextoAcao.getLinhaPai();
         Object codpg = linhaPai.getCampo("CODPG");
@@ -47,6 +48,7 @@ public class InserirDadosPagAll implements AcaoRotinaJava {
                     .set("DTPAG", dtpagParametro)
                     .set("CODTIPOPER", topParametro)
                     .set("CODNAT", naturezaParametro)
+                    .set("CODCENCUS", centroResultParametro)
                     .set("CODEMPPG", empresaPagamento)
                     .update();
 

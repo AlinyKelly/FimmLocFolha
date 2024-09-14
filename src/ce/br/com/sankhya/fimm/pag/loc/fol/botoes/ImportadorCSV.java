@@ -73,10 +73,9 @@ public class ImportadorCSV implements AcaoRotinaJava {
                                 String contaParceiro = buscarParceiro.asString("CODCTABCO");
                                 String digitoContaParceiro = buscarParceiro.asString("AD_DIGCONTAPARC");
                                 String tipoContaParceiro = buscarParceiro.asString("AD_TIPOCONTA");
-                                BigDecimal centroResultadoParceiro = buscarParceiro.asBigDecimal("AD_CODCENCUS");
                                 String erro = null;
 
-                                if (bancoParceiro == null || contaParceiro == null || digitoContaParceiro == null || tipoContaParceiro == null || centroResultadoParceiro == null) {
+                                if (bancoParceiro == null || contaParceiro == null || digitoContaParceiro == null || tipoContaParceiro == null) {
                                     erro = "ATENÇÃO! Campo(s) vazio(s). Verifique os campos de Identificação do Parceiro.";
                                 }
 
@@ -86,7 +85,6 @@ public class ImportadorCSV implements AcaoRotinaJava {
                                 updateVO.set("CODCTABCO", contaParceiro); //conta do parceiro
                                 updateVO.set("DIGCONTAPARC", digitoContaParceiro); //digito da conta do parceiro
                                 updateVO.set("TIPOCONTA", tipoContaParceiro); //tipo da conta do parceiro
-                                updateVO.set("CODCENCUS", centroResultadoParceiro); //centro de resultados do parceiro
                                 updateVO.set("ERRO", erro);
                                 updateVO.update();
                             } else {

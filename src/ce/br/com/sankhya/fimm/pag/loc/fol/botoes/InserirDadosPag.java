@@ -23,6 +23,7 @@ public class InserirDadosPag implements AcaoRotinaJava {
         Object dtpagParametro = contextoAcao.getParam("DTPAG");
         Object topParametro = contextoAcao.getParam("TOP");
         Object naturezaParametro = contextoAcao.getParam("NATUREZA");
+        Object centroResultParametro = contextoAcao.getParam("CENTRORESULTADOS");
         Object inserirParaTodasLinhas = contextoAcao.getParam("TODASLINHAS");
 
         DynamicVO buscarEmpresa = Utils.retornaVO("ContaBancaria", "CODCTABCOINT = " + contaParametro);
@@ -53,6 +54,7 @@ public class InserirDadosPag implements AcaoRotinaJava {
                 queryUpd.setNamedParameter("DTPAG", dtpagParametro);
                 queryUpd.setNamedParameter("CODTIPOPER", new BigDecimal(String.valueOf(topParametro)));
                 queryUpd.setNamedParameter("CODNAT", new BigDecimal(String.valueOf(naturezaParametro)));
+                queryUpd.setNamedParameter("CODCENCUS", new BigDecimal(String.valueOf(centroResultParametro)));
                 queryUpd.setNamedParameter("CODEMPPG", empresaPagamento);
                 queryUpd.setNamedParameter("CODPG", codpg);
                 queryUpd.addBatch();
@@ -81,6 +83,7 @@ public class InserirDadosPag implements AcaoRotinaJava {
                 linha.setCampo("DTPAG", dtpagParametro);
                 linha.setCampo("CODTIPOPER", new BigDecimal(String.valueOf(topParametro)));
                 linha.setCampo("CODNAT", new BigDecimal(String.valueOf(naturezaParametro)));
+                linha.setCampo("CODCENCUS", new BigDecimal(String.valueOf(centroResultParametro)));
                 linha.setCampo("CODEMPPG", empresaPagamento);
                 linha.save();
             }
